@@ -1,5 +1,5 @@
 {
-  "name": "crypro_notification_on_heroku",
+  "name": "crypto_notification",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ccxt": "^1.93.43"
+    "open": "^8.4.0"
   }
 }
