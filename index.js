@@ -3,7 +3,7 @@ const ccxt = require('ccxt');
 const exchange = new ccxt.binance();
 exchange.options['defaultType'] = 'future';
 
-let token = process.env.token;
+let token = 'TRlHbOPnPEt9NQSP2HgUJOZn6QOlLJgAEZvHkTrNOmT';
 
 const find = async() => {
     const date = new Date();
