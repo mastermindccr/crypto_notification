@@ -5,7 +5,7 @@ exchange.options['defaultType'] = 'future';
 
 let token = process.env.token;
 
-const find = async(token) => {
+const find = async() => {
     const date = new Date();
     if(date.getMinutes()%15!=1) return;
     await exchange.loadMarkets('true');
@@ -16,11 +16,11 @@ const find = async(token) => {
             const OHLCV = await exchange.fetchOHLCV(i, '15m');
             if(OHLCV[499][0]<1662700000000) continue;
             const percentage = (OHLCV[498][4]-OHLCV[498][1])/OHLCV[498][1];
-            if(percentage>=0.05){
-                sendMessage(token, `${i}在過去15分鐘漲了${(percentage*100).toFixed(2)}%!`);
+            if(percentage>=0.005){
+                sendMessage(`${i}在過去15分鐘漲了${(percentage*100).toFixed(2)}%!`);
             }
             else if(percentage<=-0.05){
-                sendMessage(token, `${i}在過去15分鐘跌了${(percentage*100).toFixed(2)}%!`);
+                sendMessage(`${i}在過去15分鐘跌了${(percentage*100).toFixed(2)}%!`);
             }
         }
         catch(e){
@@ -29,12 +29,12 @@ const find = async(token) => {
     }
 }
 
-async function sendMessage(token, message){
+async function sendMessage(message){
     const url = 'https://notify-api.line.me/api/notify?';
     const params = new URLSearchParams({
         message: message
     })
-    fetch(url+params, {
+    const response = await fetch(url+params, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -44,6 +44,6 @@ async function sendMessage(token, message){
 }
 
 (async() => {
-    find(token);
-    setInterval(()=>find(token), 1000*60);
+    find();
+    setInterval(()=>find(), 1000*60*10);
 })()
