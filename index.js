@@ -16,7 +16,7 @@ const find = async() => {
             const OHLCV = await exchange.fetchOHLCV(i, '15m');
             if(OHLCV[499][0]<1662700000000) continue;
             const percentage = (OHLCV[498][4]-OHLCV[498][1])/OHLCV[498][1];
-            if(percentage>=0.005){
+            if(percentage>=0.05){
                 sendMessage(`${i}在過去15分鐘漲了${(percentage*100).toFixed(2)}%!`);
             }
             else if(percentage<=-0.05){
@@ -34,7 +34,7 @@ async function sendMessage(message){
     const params = new URLSearchParams({
         message: message
     })
-    const response = await fetch(url+params, {
+    fetch(url+params, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -45,5 +45,5 @@ async function sendMessage(message){
 
 (async() => {
     find();
-    setInterval(()=>find(), 1000*60*10);
+    setInterval(()=>find(), 1000*60);
 })()
