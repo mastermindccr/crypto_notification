@@ -1,9 +1,21 @@
-const http = require('http');
-const opn = require('open');
 require('dotenv').config();
+const express = require('express');
 const ccxt = require('ccxt');
 const exchange = new ccxt.binance();
-exchange.options['defaultType'] = 'future';
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.listen(port, ()=>{
+    console.log('server is running');
+})
+
+app.get('/', async (req, res) => {
+    const code = await authorize();
+    const token = await getToken(code);
+    find(token);
+    setInterval(()=>find(token), 1000*60);
+})
 
 const find = async(token) => {
     const date = new Date();
@@ -36,7 +48,6 @@ const find = async(token) => {
 }
 
 async function authorize(){
-    const port = process.env.PORT || 3000;
     const url = "https://notify-bot.line.me/oauth/authorize?";
     const params = new URLSearchParams({
         response_type: 'code',
@@ -101,10 +112,3 @@ async function sendMessage(token, message){
         }
     })
 }
-
-(async() => {
-    const code = await authorize();
-    const token = await getToken(code);
-    find(token);
-    setInterval(()=>find(token), 1000*60);
-})()
