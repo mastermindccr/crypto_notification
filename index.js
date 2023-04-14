@@ -36,6 +36,7 @@ const find = async(token) => {
 }
 
 async function authorize(){
+    const port = process.env.PORT || 3000;
     const url = "https://notify-bot.line.me/oauth/authorize?";
     const params = new URLSearchParams({
         response_type: 'code',
@@ -56,7 +57,7 @@ async function authorize(){
                 res.end(`<h1>Authentication Failed!</h1>`);
             }
             server.close();
-        }).listen(9001, 'localhost', () => {
+        }).listen(port, () => {
             opn(url+params, {wait: false}).then(cp => {
                 cp.unref();
             })
