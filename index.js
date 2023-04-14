@@ -56,7 +56,7 @@ async function authorize(){
                 res.end(`<h1>Authentication Failed!</h1>`);
             }
             server.close();
-        }).listen(9001, process.env.uri, () => {
+        }).listen(9001, 'localhost', () => {
             opn(url+params, {wait: false}).then(cp => {
                 cp.unref();
             })
