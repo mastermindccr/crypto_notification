@@ -68,7 +68,7 @@ async function authorize(){
                 res.end(`<h1>Authentication Failed!</h1>`);
             }
             server.close();
-        }).listen(port, () => {
+        }).listen(9000, () => {
             opn(url+params, {wait: false}).then(cp => {
                 cp.unref();
             })
