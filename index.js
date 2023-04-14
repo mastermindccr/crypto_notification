@@ -14,12 +14,18 @@ const find = async(token) => {
     for(let i in tickers){
         try{
             const OHLCV = await exchange.fetchOHLCV(i, '15m');
-            if(OHLCV[499][0]<1662700000000) continue;
+            // if(OHLCV[499][0]<1662700000000) continue;
+            let sum = 0
+            for(let i = 450;i<=499;i++){
+                sum+=OHLCV[i][5];
+            }
+            avg_50 = sum/50
+            if(OHLCV[499][5]<=avg_50) continue;
             const percentage = (OHLCV[498][4]-OHLCV[498][1])/OHLCV[498][1];
-            if(percentage>=0.05){
+            if(percentage>=0){
                 sendMessage(token, `${i}在過去15分鐘漲了${(percentage*100).toFixed(2)}%!`);
             }
-            else if(percentage<=-0.05){
+            else if(percentage<=0){
                 sendMessage(token, `${i}在過去15分鐘跌了${(percentage*100).toFixed(2)}%!`);
             }
         }
