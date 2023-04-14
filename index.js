@@ -8,7 +8,7 @@ let oauth_url = "https://notify-bot.line.me/oauth/authorize?";
 const params = new URLSearchParams({
     response_type: 'code',
     client_id: process.env.client_id,
-    redirect_uri: process.env.redirect_uri,
+    redirect_uri: 'http://localhost:3000' + process.env.redirect_uri,
     scope: 'notify',
     state: 'cryptoBotTest'
 });
@@ -18,7 +18,7 @@ oauth_url+=params
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.listen(port, ()=>{
+app.listen(port, () => {
     console.log('server is running');
 })
 
@@ -41,14 +41,15 @@ app.get('/oauth2callback', async (req, res) => {
 
 const find = async(token) => {
     const date = new Date();
-    if(date.getMinutes()%15!=1) return;
+    if(date.getMinutes()%60!=1) return;
     await exchange.loadMarkets('true');
     const symbols = exchange.symbols;
-    const tickers = await exchange.fetchTickers(symbols, {});
-    for(let i in tickers){
+    for(let i of symbols){
+        // it is not a USDT pair
+        if(i.indexOf("/USDT")==-1)continue; 
         try{
-            const OHLCV = await exchange.fetchOHLCV(i, '15m');
-            // if(OHLCV[499][0]<1662700000000) continue;
+            const OHLCV = await exchange.fetchOHLCV(i, '1h');
+            if(OHLCV[499][0]<1681400000000) continue;
             let sum = 0
             for(let i = 450;i<=499;i++){
                 sum+=OHLCV[i][5];
@@ -84,7 +85,7 @@ async function getToken(code){
     const params = new URLSearchParams({
         grant_type: 'authorization_code',
         code: code,
-        redirect_uri: process.env.redirect_uri,
+        redirect_uri: 'http://localhost:3000' + process.env.redirect_uri,
         client_id: process.env.client_id,
         client_secret: process.env.client_secret
     })
@@ -97,9 +98,7 @@ async function getToken(code){
     })
     const token = (await response.json()).access_token;
 
-    return new Promise(resolve => {
-        resolve(token);
-    })
+    return token;
 }
 
 async function sendMessage(token, message){
