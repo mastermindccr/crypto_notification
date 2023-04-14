@@ -3,6 +3,18 @@ const express = require('express');
 const ccxt = require('ccxt');
 const exchange = new ccxt.binance();
 
+// define Line oauth url
+let oauth_url = "https://notify-bot.line.me/oauth/authorize?";
+const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: process.env.client_id,
+    redirect_uri: process.env.redirect_uri,
+    scope: 'notify',
+    state: 'cryptoBotTest'
+});
+oauth_url+=params
+
+// define server element
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -10,11 +22,21 @@ app.listen(port, ()=>{
     console.log('server is running');
 })
 
-app.get('/', async (req, res) => {
-    const code = await authorize();
-    const token = await getToken(code);
-    find(token);
-    setInterval(()=>find(token), 1000*60);
+app.get('/', (req, res) => {
+    res.redirect(oauth_url)
+})
+
+app.get('/oauth2callback', async (req, res) => {
+    const code = authorize(req);
+    if(code!=null){
+        const token = await getToken(code);
+        find(token);
+        setInterval(()=>find(token), 1000*60);
+        res.end(`<h1>Authentication Successful!</h1>`);
+    }
+    else{
+        res.end(`<h1>Authentication Failed!</h1>`);
+    }
 })
 
 const find = async(token) => {
@@ -47,33 +69,14 @@ const find = async(token) => {
     }
 }
 
-async function authorize(){
-    const url = "https://notify-bot.line.me/oauth/authorize?";
-    const params = new URLSearchParams({
-        response_type: 'code',
-        client_id: process.env.client_id,
-        redirect_uri: process.env.redirect_uri,
-        scope: 'notify',
-        state: 'cryptoBotTest'
-    });
-    return new Promise((resolve, reject) => {
-        const server = http.createServer((req, res) => {
-            const origin = new URL(req.url, `https://${req.rawHeaders[1]}`)
-            try{
-                resolve(origin.searchParams.get('code'));
-                res.end(`<h1>Authentication Successful!</h1>`);
-            }
-            catch(e){
-                reject(e);
-                res.end(`<h1>Authentication Failed!</h1>`);
-            }
-            server.close();
-        }).listen(9000, () => {
-            opn(url+params, {wait: false}).then(cp => {
-                cp.unref();
-            })
-        })
-    })
+function authorize(req){
+    const origin = new URL(req.url, `https://${req.rawHeaders[1]}`)
+    try{
+        return origin.searchParams.get('code');
+    }
+    catch(e){
+        return null;
+    }
 }
 
 async function getToken(code){
